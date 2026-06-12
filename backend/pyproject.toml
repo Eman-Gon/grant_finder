@@ -1,0 +1,20 @@
+[project]
+name = "grant-finder"
+version = "0.1.0"
+description = "Grant Finder — AI-powered federal grant matching for nonprofits and startups."
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "sse-starlette",
+    "httpx",
+    "trafilatura",
+    "anthropic",
+    "pydantic",
+    "pydantic-settings",
+    "python-dotenv",
+    "orjson",
+]
+
+[tool.uv]
+package = false

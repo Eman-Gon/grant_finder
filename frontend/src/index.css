@@ -1,0 +1,281 @@
+/* Receipts — design language ported from Aperture.
+   Warm off-white base, OKLCH low-chroma palette, glass material via RGB
+   triples, editorial typography. Restrained — never colourful. */
+
+@import url('https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Surface — warm off-white base, deep slate foreground */
+  --bg: oklch(0.99 0.005 80);
+  --surface: oklch(1 0 0);
+  --surface-2: oklch(0.97 0.006 80);
+  --surface-3: oklch(0.94 0.008 270);
+
+  --border: oklch(0.92 0.005 270);
+  --border-strong: oklch(0.85 0.008 270);
+
+  --text: oklch(0.18 0.02 270);
+  --text-2: oklch(0.32 0.02 270);
+  --muted: oklch(0.5 0.012 270);
+
+  /* Accent — quiet indigo. Used sparingly, never as a vibe. */
+  --accent: oklch(0.55 0.18 264);
+  --accent-soft: oklch(0.92 0.04 264);
+
+  /* Verdict palette — desaturated, editorial. NOT eye-catching. */
+  --verdict-good: oklch(0.55 0.10 150);    /* moss */
+  --verdict-good-soft: oklch(0.96 0.04 150);
+  --verdict-warn: oklch(0.62 0.11 75);     /* dusty amber */
+  --verdict-warn-soft: oklch(0.96 0.04 75);
+  --verdict-bad: oklch(0.55 0.14 25);      /* terracotta */
+  --verdict-bad-soft: oklch(0.96 0.04 25);
+
+  /* Glass — RGB triples so callers compose alpha. This is the trick. */
+  --glass-bg: 255, 255, 255;
+  --glass-border: 255, 255, 255;
+
+  --font-sans: 'Geist', system-ui, -apple-system, sans-serif;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 22px;
+  --radius-full: 9999px;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 1.55;
+  letter-spacing: -0.005em;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Glass material — the workhorse. */
+.glass {
+  background: linear-gradient(
+    135deg,
+    rgba(var(--glass-bg), 0.85) 0%,
+    rgba(var(--glass-bg), 0.55) 100%
+  );
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(var(--glass-border), 0.7);
+  box-shadow:
+    0 8px 30px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(var(--glass-border), 0.9),
+    inset 0 -1px 0 rgba(15, 23, 42, 0.04);
+}
+
+/* Pill button — neutral, restrained. */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: linear-gradient(180deg, #ffffff 0%, oklch(0.97 0.005 270) 100%);
+  color: var(--text);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+}
+.pill:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9); }
+.pill:active { transform: translateY(0); }
+.pill:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.pill-primary {
+  background: linear-gradient(180deg, oklch(0.22 0.02 270) 0%, oklch(0.16 0.02 270) 100%);
+  color: oklch(0.98 0 0);
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  box-shadow:
+    0 1px 2px rgba(15, 23, 42, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.18);
+}
+.pill-primary:hover { box-shadow: 0 6px 16px rgba(15, 23, 42, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.22); }
+
+/* Subtle paper-like tile for stat boxes etc. */
+.paper {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+
+/* Gradient-fade headline — very subtle. Top is full slate, bottom is 90%
+   slate. Almost solid; the fade is there only to soften the optical weight
+   of huge display type, not as an aesthetic move. */
+.headline-fade {
+  background: linear-gradient(180deg, var(--text) 0%, oklch(0.18 0.02 270 / 0.88) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Rotating-text fade-in — fires on every React key change. */
+@keyframes rotate-fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.rotate-fade {
+  display: inline-block;
+  animation: rotate-fade-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(15, 23, 42, 0.10); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(15, 23, 42, 0.20); }
+
+/* Aurora — bigger, more dramatic version of the backdrop for the landing
+   page only. Underlying smooth gradient (radial highlights + diagonal
+   linear) for the obvious "this is a gradient" feel; aurora drift sits on
+   top for atmosphere. Ported from the aperture frontend pattern. */
+.aurora-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 120% 80% at 15% 0%, oklch(0.94 0.08 264 / 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 90% 100%, oklch(0.94 0.07 320 / 0.45) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, oklch(0.96 0.05 200 / 0.30) 0%, transparent 60%),
+    linear-gradient(135deg, oklch(0.99 0.005 80) 0%, oklch(0.97 0.02 280) 100%);
+}
+.aurora-bg::before,
+.aurora-bg::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  filter: blur(70px) saturate(140%);
+  opacity: 0.85;
+  will-change: transform;
+}
+.aurora-bg::before {
+  background:
+    repeating-linear-gradient(
+      105deg,
+      oklch(0.78 0.10 264) 0%,
+      oklch(0.85 0.08 264) 8%,
+      transparent 11%,
+      transparent 14%,
+      oklch(0.82 0.09 264) 18%
+    );
+  background-size: 240% 180%;
+  animation: aurora-drift 36s linear infinite;
+  mix-blend-mode: multiply;
+}
+.aurora-bg::after {
+  background:
+    repeating-linear-gradient(
+      75deg,
+      oklch(0.82 0.10 320) 0%,
+      oklch(0.88 0.07 320) 8%,
+      transparent 12%,
+      transparent 16%,
+      oklch(0.84 0.09 200) 20%
+    );
+  background-size: 220% 180%;
+  animation: aurora-drift 48s linear infinite reverse;
+  mix-blend-mode: screen;
+  opacity: 0.55;
+}
+@keyframes aurora-drift {
+  from { background-position: 0% 0%; }
+  to   { background-position: 200% 50%; }
+}
+
+/* Ambient gradient backdrop — three drifting soft blobs.
+   Sits behind everything. Cheap (CSS only) and atmospheric. */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--bg);
+}
+.backdrop::before,
+.backdrop::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.55;
+}
+.backdrop::before {
+  width: 60vw;
+  height: 60vw;
+  top: -20vw;
+  left: -10vw;
+  background: radial-gradient(circle, oklch(0.82 0.12 264 / 0.7) 0%, transparent 70%);
+  animation: drift1 24s ease-in-out infinite alternate;
+}
+.backdrop::after {
+  width: 55vw;
+  height: 55vw;
+  bottom: -15vw;
+  right: -10vw;
+  background: radial-gradient(circle, oklch(0.86 0.10 320 / 0.6) 0%, transparent 70%);
+  animation: drift2 28s ease-in-out infinite alternate;
+}
+@keyframes drift1 {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(6vw, 4vw) scale(1.08); }
+}
+@keyframes drift2 {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-5vw, -3vw) scale(1.06); }
+}
+
+/* Reveal keyframes — applied per element with stagger via animation-delay. */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-down {
+  from { opacity: 0; transform: translateY(-14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fade-in-left {
+  from { opacity: 0; transform: translateX(-18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes scale-fade-out {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.96); }
+}
+
+.reveal-up    { animation: fade-up    0.6s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.reveal-down  { animation: fade-down  0.5s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.reveal-left  { animation: fade-in-left 0.55s cubic-bezier(0.16, 1, 0.3, 1) both; }
+.reveal-fade  { animation: fade-in    0.5s ease-out both; }
+
+.d-0  { animation-delay: 0s; }
+.d-1  { animation-delay: 0.08s; }
+.d-2  { animation-delay: 0.16s; }
+.d-3  { animation-delay: 0.24s; }
+.d-4  { animation-delay: 0.32s; }
+.d-5  { animation-delay: 0.40s; }
+.d-6  { animation-delay: 0.48s; }
