@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: grant-finder-backend
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.server:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: GRANTS_GOV_API_KEY
+        sync: false
+      - key: SIMPLER_GRANTS_API_KEY
+        sync: false
